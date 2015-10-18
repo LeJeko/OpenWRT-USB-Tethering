@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Patch for iPhone USB tethering lockdown
-# v3.1 2015.10.03 - Jeko
+# v3.3 2015.10.03 - Jeko
 #
 # Use:
 # ./lockdown.sh install

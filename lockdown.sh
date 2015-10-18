@@ -1,10 +1,11 @@
 #!/bin/sh
 #
 # Patch for iPhone USB tethering lockdown
-# v3.0 2015.09.12 - Jeko
+# v3.1 2015.10.03 - Jeko
 #
 # Use:
-# install	installing script in /etc/lockdown
+# ./lockdown.sh install
+# => installing script in /etc/lockdown
 
 # argument (source executing script)
 if [ -z $1 ];then
@@ -83,12 +84,22 @@ if [ -z `cat /etc/config/network | grep "eth1"` ];then
 else
 	check=$((check + 1))
 fi
+need_reboot=""
+if [ -z `cat /etc/config/network | grep "192.168.0.1"` ];then
+	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : changing IP to 192.168.0.1"
+	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : changing IP to 192.168.0.1" >> $LOG
+	sed -i -e "s/192.168.1.1/192.168.0.1/g" /etc/config/network
+	need_reboot="yes"
+	check=$((check + 1))
+else
+	check=$((check + 1))
+fi
 
 ### Check rc.local configuration
 if [ -z `cat /etc/rc.local | grep "lockdown"` ];then
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : configuring /etc/rc.local"
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : configuring /etc/rc.local" >> $LOG
-	sed -i 4i'sh /etc/lockdown/lockdown.sh "rc.local"' /etc/rc.local
+	sed -i 3i'sh /etc/lockdown/lockdown.sh "rc.local"' /etc/rc.local
 	check=$((check + 1))
 else
 	check=$((check + 1))
@@ -110,7 +121,7 @@ else
 	check=$((check + 1))
 fi
 
-if [ $check -eq 4 ];then
+if [ $check -eq 5 ];then
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : Configuration OK"
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : Configuration OK" >> $LOG
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : Configuration OK" >> /etc/lockdown/config.ok
@@ -198,5 +209,10 @@ fi
 
 ### Verifying usbmudx porcess end
 ###################################
+
+if [ "$need_reboot" = "yes" ];then
+	echo "!!!--- Please type reboot and reconnect with new IP 192.168.0.1 ---!!!"
+	echo "!!!--- Please type reboot and reconnect with new IP 192.168.0.1 ---!!!" >> $LOG
+fi
 
 exit 0

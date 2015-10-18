@@ -1,7 +1,17 @@
 #!/bin/sh
 #
 # Patch for iPhone USB tethering lockdown
-# v3.3 2015.10.03 - Jeko
+#
+# v4.0 2015.10.17 : Jeko
+# - add Android tethering
+# v4.1 2015.10.18 : Jeko
+# - add 'usb0' interface and bridge it with 'eth1'
+# - change default ip to 192.168.0.254
+# v4.2 2015.10.18 : Jeko
+# - LuCI come back !
+# - complete remove of IPv6 support
+# v4.3 2015.10.18 : Jeko
+# - add opkg
 #
 # Use:
 # ./lockdown.sh install
@@ -74,8 +84,9 @@ if [ -z `cat /etc/config/network | grep "eth1"` ];then
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : configuring /etc/config/network"
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : configuring /etc/config/network" >> $LOG
 	echo "config interface wan" >> /etc/config/network
-	echo "        option ifname 'eth1'" >> /etc/config/network
+	echo "        option type 'bridge'" >> /etc/config/network
 	echo "        option proto 'dhcp'" >> /etc/config/network
+	echo "        option ifname 'eth1 usb0'" >> /etc/config/network
 	echo "" >> /etc/config/network
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : restarting network"
 	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : restarting network" >> $LOG
@@ -85,10 +96,10 @@ else
 	check=$((check + 1))
 fi
 need_reboot=""
-if [ -z `cat /etc/config/network | grep "192.168.0.1"` ];then
-	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : changing IP to 192.168.0.1"
-	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : changing IP to 192.168.0.1" >> $LOG
-	sed -i -e "s/192.168.1.1/192.168.0.1/g" /etc/config/network
+if [ -z `cat /etc/config/network | grep "192.168.0.254"` ];then
+	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : changing IP to 192.168.0.254"
+	echo "LOCKDOWN [$$] : `date +"%d.%m.%Y %T"` : -$source- : changing IP to 192.168.0.254" >> $LOG
+	sed -i -e "s/192.168.1.1/192.168.0.254/g" /etc/config/network
 	need_reboot="yes"
 	check=$((check + 1))
 else
@@ -211,8 +222,8 @@ fi
 ###################################
 
 if [ "$need_reboot" = "yes" ];then
-	echo "!!!--- Please type reboot and reconnect with new IP 192.168.0.1 ---!!!"
-	echo "!!!--- Please type reboot and reconnect with new IP 192.168.0.1 ---!!!" >> $LOG
+	echo "!!!--- Please type reboot and reconnect with new IP 192.168.0.254 ---!!!"
+	echo "!!!--- Please type reboot and reconnect with new IP 192.168.0.254 ---!!!" >> $LOG
 fi
 
 exit 0

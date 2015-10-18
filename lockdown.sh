@@ -1,12 +1,17 @@
 #!/bin/sh
 #
 # Patch for iPhone USB tethering lockdown
-# include modules for Android USB tethering
+#
 # v4.0 2015.10.17 : Jeko
 # - add Android tethering
 # v4.1 2015.10.18 : Jeko
 # - add 'usb0' interface and bridge it with 'eth1'
-# - change default ip from 192.168.0.1 to 192.168.0.254
+# - change default ip to 192.168.0.254
+# v4.2 2015.10.18 : Jeko
+# - LuCI come back !
+# - complete remove of IPv6 support
+# v4.3 2015.10.18 : Jeko
+# - add opkg
 #
 # Use:
 # ./lockdown.sh install

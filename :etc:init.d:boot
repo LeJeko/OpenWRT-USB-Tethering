@@ -22,6 +22,8 @@ boot() {
 	[ -f /proc/jffs2_bbc ] && echo "S" > /proc/jffs2_bbc
 	[ -f /proc/net/vlan/config ] && vconfig set_name_type DEV_PLUS_VID_NO_PAD
 
+	mkdir -p /var/lib/lockdown
+	echo "LOCKDOWN [$$] : -boot- : create /var/lib/lockdown" >> "/etc/lockdown/lockdown.log"
 	mkdir -p /var/run
 	mkdir -p /var/log
 	mkdir -p /var/lock

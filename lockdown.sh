@@ -12,6 +12,8 @@
 # - complete remove of IPv6 support
 # v4.3 2015.10.18 : Jeko
 # - add opkg
+# v4.4 2015.10.20 : Jeko
+# - add French translation for LuCI 
 #
 # Use:
 # ./lockdown.sh install

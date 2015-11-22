@@ -2,7 +2,7 @@
 When using USB tethering with iOS, the folder who UUID.plist are stored (/var/lib/lockdown) is erased at each reboot...
 So I've created the script "lockdown.sh" to backup those files each minute and restore it at each boot.
 
-I've also managed to fit all necessary on a 4MB size firmware but without LuCI.
+I've also managed to fit all necessary on a 4MB size firmware with LuCI.
 It is based on the last OpenWRT 15.05 Chaos Calmer and all is pre-configured.
 
 Included firmware for most popular routeur: TL-MR3020 and TL-W703N

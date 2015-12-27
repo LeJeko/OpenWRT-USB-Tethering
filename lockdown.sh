@@ -32,7 +32,7 @@
 #   even if the screen is locked.
 # - Device is charging.
 
-# Use:
+# Installation:
 
 # /!\ A valid internet connection via Wi-Fi or WAN Ethernet
 # /!\ is required for installing required packages
@@ -42,8 +42,23 @@
 #	 $ sh /tmp/lockdown.sh install
 # 3. Restart the device
 # 4. Reconnect with new IP 192.1680.254
+
+# Connect iOS device
+
+# After many tests, the best way to connect an iPhone is:
+# a. Inactive Internet sharing
+# b. Connect iPhone via USB
+# c. At asked, "Trust" the device
+# d. Active internet sharing
+# e. The blue band will appears on the top of the screen
+#    (if not after 30sec, inactive and reactive internet sharing)
+# f. Leave all connected at least one minute so the script can do its job
 #
-# A Log file is located here /etc/lockdown/lockdown.log
+# To test if the file has been created, disconnect and reconnect the iPhone.
+# If the dialog "Trust" appears, validate and repeat step 2.
+# When the connection is automatic, you're gone.
+# 
+# A log is stored in /etc/lockdown/lockdown.log
 
 ############################################################################
 ####	BEGIN OF SCRIPT

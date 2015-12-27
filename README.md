@@ -18,7 +18,8 @@ You can find firmwares for most popular routeur: TL-MR3020 and TL-W703N with the
 (aks for any model supported by OpenWRT)
 
 Compile yourself
--------------Rename the chaos_calmer.config file to .config to get the right menuconfig.
+-------------
+Rename the chaos_calmer.config file to .config to get the right menuconfig.
 
 v5 2015.12.27 : Jeko
 ------------------

@@ -16,7 +16,7 @@
 #
 # Check the required packages and installs them if there is enough space available
 # Up to 1.6 MB for all packages. A device with 8 MB flash is recommended.
-# For the common TL-WR3020 and TL-703N with 4MB flash, a customized firmware
+# For the common TL-MR3020 and TL-W703N with 4MB flash, a customized firmware
 # (without IPv6 and Wi-Fi support)
 # is available at https://github.com/LeJeko/OpenWRT-USB-Tethering/releases
 #

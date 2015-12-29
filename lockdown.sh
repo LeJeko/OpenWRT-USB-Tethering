@@ -2,15 +2,16 @@
 
 ############################################################################
 ############################################################################
-####																	####
-####	LOCKDOWN v5														####
-####																	####
-####	An OpenWrt script to add USB Tethering for iOS and Android		####
-####																	####
+####                                                                    ####
+####    LOCKDOWN v5                                                     ####
+####                                                                    ####
+####    An OpenWrt script to add USB Tethering for iOS and Android      ####
+####                                                                    ####
 ############################################################################
 ############################################################################
 
-# v5 2015.12.27 : Jeko
+# v5.0 - 2015.12.27 : Jeko
+# v5.1 - 2015.12.29 : Jeko
 
 # Features:
 #
@@ -71,9 +72,10 @@ else
 	source=$1
 fi
 
-# Lockdown log path
+# Lockdown log path and var
 LOG="/etc/lockdown/lockdown.log"
 path=`dirname "$0"`
+new_ip="192.168.0.254"
 
 ################################
 ### installation start
@@ -82,9 +84,10 @@ if [ "$source" == "install" ];then
 
 # Creating directories for log file
 	if [ ! -d "/etc/lockdown/locks" ];then
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Creating lockdown directories"
+		timestamp=`date +"%d.%m.%Y %T"`
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : Creating lockdown directories"
 		mkdir -p /etc/lockdown/locks
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Creating lockdown directories" >> $LOG
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : Creating lockdown directories" >> $LOG
 	fi
 
 # checking modules
@@ -96,7 +99,7 @@ if [ "$source" == "install" ];then
 	do
 		pkg=`echo $i | awk -F":" '{print $1}'`
 		size=`echo $i | awk -F":" '{print $NF}'`
-		if [ -z `opkg list-installed | grep -E "^$pkg"` ];then
+		if [ -z `opkg list-installed | grep -E ^$pkg` ];then
 			install_pkg="$install_pkg $pkg"
 			install_size=`expr $install_size + $size`
 		fi
@@ -107,37 +110,48 @@ if [ "$source" == "install" ];then
 		FreeSpace=`df | grep rootfs | awk -F" " '{print $4}'`
 		if [ "$FreeSpace" -lt "$install_size" ];then
 			echo "====================================="
-			echo "/!\ No more space to install packages"
+			echo "/!\\ No more space to install packages:"
+			echo "($install_pkg )"
 			echo "Needed:    $install_size Ko"
 			echo "Available: $FreeSpace Ko"
 			echo "====================================="
 			exit 0
 		else
+			echo "====================================="
+			echo "Packages to install:"
+			echo "($install_pkg )"
 			echo "Space needed: $install_size Ko"
 			echo "Free space: $FreeSpace Ko"
 	# Check Internet connection
-			if [ -z `ping -c 4 -w 5 8.8.8.8 | grep -e 'round-trip' | awk -F'/' '{print $4}'`];then
+			echo "Checking Internet connexion..."
+			if [ -z "`ping -c 4 -w 5 8.8.8.8 | grep -e 'round-trip' | awk -F'/' '{print $4}'`" ];then
 				echo "====================================="
-				echo "/!\ Internet isn't available"
+				echo "/!\\ Internet isn't available"
 				echo "Can't install needed packages"
 				echo "====================================="
 				exit 0
 			fi
 	# installing packages
-			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Updating package list"
-			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Updating package list" >> $LOG
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : Updating package list"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : Updating package list" >> $LOG
 				opkg update
-			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Installing packages"
-			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Installing packages" >> $LOG
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : Installing packages"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : Installing packages" >> $LOG
 				opkg install $install_pkg
 		fi
 	else
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : No pkg install needed"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : No pkg install needed" >> $LOG
+		timestamp=`date +"%d.%m.%Y %T"`
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : No install needed"
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : No install needed" >> $LOG
 	fi
-	echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Installing script in /etc/lockdown/lockdown.sh"
-	echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Installing script in /etc/lockdown/lockdown.sh" >> $LOG
+
+	# installing script
 	if [ ! -f "/etc/lockdown/lockdown.sh" ];then
+		timestamp=`date +"%d.%m.%Y %T"`
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : Installing script in /etc/lockdown/lockdown.sh"
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : Installing script in /etc/lockdown/lockdown.sh" >> $LOG
 		touch /etc/lockdown/locks/0000000000000000000000000000000000000000.plist
 		cp $path/lockdown.sh /etc/lockdown/
 		chmod +x /etc/lockdown/lockdown.sh
@@ -162,87 +176,110 @@ else
 	### Checking configuration start
 
 	if [ ! -f "/etc/lockdown/config.ok" ];then
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : checking configuration"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : checking configuration" >> $LOG
+		timestamp=`date +"%d.%m.%Y %T"`
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : checking configuration"
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : checking configuration" >> $LOG
 		check=0
 
 		### Check boot file
-		if [ -z `cat /etc/init.d/boot | grep "lockdown"` ];then
-			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : configuring /etc/init.d/boot"
-			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : configuring /etc/init.d/boot" >> $LOG
+		if [ -z "`cat /etc/init.d/boot | grep lockdown`" ];then
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : configuring /etc/init.d/boot"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : configuring /etc/init.d/boot" >> $LOG
 			sed -i 25i'	echo "LOCKDOWN [$$] : -boot- : create /var/lib/lockdown" >> "/etc/lockdown/lockdown.log"' /etc/init.d/boot
 			sed -i 25i'	mkdir -p /var/lib/lockdown' /etc/init.d/boot
 			check=$((check + 1))
 		else
 			check=$((check + 1))
 		fi
-	fi
 
-	### Configuring network and firewall
-	if [ -z `cat /etc/config/network | grep "eth1"` ];then
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : configuring network and firewall"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : configuring network and firewall" >> $LOG
+		### Configuring network and firewall
+		need_reboot=""
+		ip_change=""
 
-	# network
-		uci set network.usb=interface
-		uci set network.usb.ifname='eth1 usb0'
-		uci set network.usb.type=bridge
-		uci set network.usb.proto=dhcp
+		if [ -z "`cat /etc/config/network | grep eth1`" ];then
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : configuring network and firewall"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : configuring network and firewall" >> $LOG
 
-	# firewall
-		wan_network=`uci get firewall.@zone[1].network`
-		uci set firewall.@zone[1].network="$wan_network usb"
+			# network
+			uci set network.usb=interface
+			uci set network.usb.ifname='eth1 usb0'
+			uci set network.usb.type=bridge
+			uci set network.usb.proto=dhcp
 
-	### commit at the end of the script
+			# firewall
+			wan_network=`uci get firewall.@zone[1].network`
+			uci set firewall.@zone[1].network="$wan_network usb"
 
-		check=$((check + 1))
-	else
-		check=$((check + 1))
-	fi
-	need_reboot=""
-	if [ `uci get network.lan.ipaddr` != "192.168.0.254" ];then
-		need_reboot="yes"
-		check=$((check + 1))
-	else
-		check=$((check + 1))
-	fi
+			# committing changes
+			uci commit
 
-	### Check rc.local configuration
-	if [ -z `cat /etc/rc.local | grep "lockdown"` ];then
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : configuring /etc/rc.local"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : configuring /etc/rc.local" >> $LOG
-		sed -i 3i'sh /etc/lockdown/lockdown.sh "rc.local"' /etc/rc.local
-		check=$((check + 1))
-	else
-		check=$((check + 1))
-	fi
+			### Don't restart network in case of manual install because disconnecting current ssh session
+			if [ "$source" != "install" ];then
+				timestamp=`date +"%d.%m.%Y %T"`
+				echo "LOCKDOWN [$$] : $timestamp : -$source- : Restarting network"
+				echo "LOCKDOWN [$$] : $timestamp : -$source- : Restarting network" >> $LOG
+				/etc/init.d/network restart
+			else
+				need_reboot="yes"
+			fi
+			check=$((check + 1))
+		else
+			check=$((check + 1))
+		fi
 
-	### Check Cron configuration
-	if [ ! -f "/etc/crontabs/root" ];then
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : create /etc/crontabs/root"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : create /etc/crontabs/root" >> $LOG
-		touch /etc/crontabs/root
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : configuring /etc/crontabs/root"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : configuring /etc/crontabs/root" >> $LOG
-		echo "* * * * * sh /etc/lockdown/lockdown.sh cron" >> /etc/crontabs/root
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : restarting cron"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : restarting cron" >> $LOG
-		/etc/init.d/cron restart                                                          
-		check=$((check + 1))
-	else
-		check=$((check + 1))
-	fi
-	### Check counter
-	if [ "$check" -eq 5 ];then
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Configuration OK"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Configuration OK" >> $LOG
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Configuration OK" >> /etc/lockdown/config.ok
-		rm -f /etc/lockdown/config.error
-	else
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Configuration Error"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Configuration Error" >> $LOG
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Configuration Error" >> /etc/lockdown/config.error
-		rm -f /etc/lockdown/config.ok
+		if [ "`uci get network.lan.ipaddr`" != "$new_ip" ];then
+			ip_change="yes"
+			need_reboot="yes"
+			check=$((check + 1))
+		else
+			check=$((check + 1))
+		fi
+
+		### Check rc.local configuration
+		if [ -z "`cat /etc/rc.local | grep lockdown`" ];then
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : configuring /etc/rc.local"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : configuring /etc/rc.local" >> $LOG
+			sed -i 3i'sh /etc/lockdown/lockdown.sh "rc.local"' /etc/rc.local
+			check=$((check + 1))
+		else
+			check=$((check + 1))
+		fi
+
+		### Check Cron configuration
+		if [ ! -f "/etc/crontabs/root" ];then
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : create /etc/crontabs/root"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : create /etc/crontabs/root" >> $LOG
+			touch /etc/crontabs/root
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : configuring /etc/crontabs/root"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : configuring /etc/crontabs/root" >> $LOG
+			echo "* * * * * sh /etc/lockdown/lockdown.sh cron" >> /etc/crontabs/root
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : restarting cron"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : restarting cron" >> $LOG
+			/etc/init.d/cron restart                                                          
+			check=$((check + 1))
+		else
+			check=$((check + 1))
+		fi
+		### Check counter
+		if [ "$check" -eq 5 ];then
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : Configuration OK"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : Configuration OK" >> $LOG
+			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Configuration OK" >> /etc/lockdown/config.ok
+			rm -f /etc/lockdown/config.error
+		else
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : Configuration Error"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : Configuration Error" >> $LOG
+			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Configuration Error" >> /etc/lockdown/config.error
+			rm -f /etc/lockdown/config.ok
+		fi
 	fi
 	### Checking configuration end
 	################################
@@ -254,8 +291,9 @@ fi
 ### Restore start
 
 if [ ! -d "/var/lib/lockdown" ];then
-	echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Creating directory /var/lib/lockdown"
-	echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : Creating directory /var/lib/lockdown" >> $LOG
+	timestamp=`date +"%d.%m.%Y %T"`
+	echo "LOCKDOWN [$$] : $timestamp : -$source- : Creating directory /var/lib/lockdown"
+	echo "LOCKDOWN [$$] : $timestamp : -$source- : Creating directory /var/lib/lockdown" >> $LOG
 	mkdir -p /var/lib/lockdown
 fi
 
@@ -263,8 +301,9 @@ bkp_files=`ls /etc/lockdown/locks`
 for file in $bkp_files;
 do
 	if [ ! -f "/var/lib/lockdown/$file" ];then
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : restore lockdown : $file"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : restore lockdown : $file" >> $LOG
+		timestamp=`date +"%d.%m.%Y %T"`
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : restore lockdown : $file"
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : restore lockdown : $file" >> $LOG
 		cp /etc/lockdown/locks/$file /var/lib/lockdown/
 	fi
 done
@@ -276,11 +315,12 @@ done
 ### Backup start
 
 for file in `ls /var/lib/lockdown | grep -v SystemConfiguration.plist`;
-	do
+do
 	if [ ! -f "/etc/lockdown/locks/$file" ];then
 		DeviceName=`ideviceinfo | grep DeviceName | awk -F":" '{print $NF}'`
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : backup lockdown for$DeviceName : $file"
-		echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : backup lockdown for$DeviceName : $file" >> $LOG
+		timestamp=`date +"%d.%m.%Y %T"`
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : backup lockdown for$DeviceName : $file"
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : backup lockdown for$DeviceName : $file" >> $LOG
 		cp /var/lib/lockdown/$file /etc/lockdown/locks/
 	else
 # Case if Device was restored
@@ -288,8 +328,9 @@ for file in `ls /var/lib/lockdown | grep -v SystemConfiguration.plist`;
 		old_md5=`md5sum /etc/lockdown/locks/$file | awk -F" " '{print $1}'`
 		if [ "$new_md5" != "$old_md5" ];then
 			DeviceName=`ideviceinfo | grep DeviceName | awk -F":" '{print $NF}'`
-			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : updating lockdown for$DeviceName : $file"
-			echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : updating lockdown for$DeviceName : $file" >> $LOG
+			timestamp=`date +"%d.%m.%Y %T"`
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : updating lockdown for$DeviceName : $file"
+			echo "LOCKDOWN [$$] : $timestamp : -$source- : updating lockdown for$DeviceName : $file" >> $LOG
 			cp /var/lib/lockdown/$file /etc/lockdown/locks/
 		fi
 	fi
@@ -310,8 +351,9 @@ proc_usbmuxd=`ps | grep usbmuxd`
 nb_usbmuxd=`echo "$proc_usbmuxd" | grep /usr/sbin/usbmuxd | wc -l`
 # echo "nb_usbmuxd: $nb_usbmuxd" >> $LOG
 if [ ! "$nb_usbmuxd" -eq 1 ];then
-	echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : starting usbmuxd"
-	echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : starting usbmuxd" >> $LOG
+	timestamp=`date +"%d.%m.%Y %T"`
+	echo "LOCKDOWN [$$] : $timestamp : -$source- : starting usbmuxd"
+	echo "LOCKDOWN [$$] : $timestamp : -$source- : starting usbmuxd" >> $LOG
 	/usr/sbin/usbmuxd
 fi
 
@@ -323,18 +365,25 @@ fi
 ### Final configuration and commit
 
 if [ "$need_reboot" == "yes" ];then
-	echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : changing LAN IP to 192.168.0.254"
-	echo "LOCKDOWN [$$] : `date +\"%d.%m.%Y %T\"` : -$source- : changing LAN IP to 192.168.0.254" >> $LOG
-	uci set network.lan.ipaddr='192.168.0.254'
-	uci commit
-	echo "========================================================================"
-	echo "==================== NETWORK CONFIG HAS CHANGED ========================"
-	echo "========================================================================"
-	echo "/!\\--- Please type reboot and reconnect with new IP 192.168.0.254 ---/!\\"
-	echo "========================================================================"
-	echo "========================================================================"
-	echo "/!\\--- Please type reboot and reconnect with new IP 192.168.0.254 ---/!\\" >> $LOG
+	echo "======================================================================================"
+	echo "=========================== NETWORK CONFIG HAS CHANGED ==============================="
+	echo "======================================================================================"
+	if [ "$ip_change" == "yes" ];then
+		timestamp=`date +"%d.%m.%Y %T"`
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : changing LAN IP to $new_ip"
+		echo "LOCKDOWN [$$] : $timestamp : -$source- : changing LAN IP to $new_ip" >> $LOG
+		uci set network.lan.ipaddr="$new_ip"
+		uci commit
+		echo "/!\\---------- Please type reboot and reconnect with new IP $new_ip ----------/!\\"
+		echo "======================================================================================"
+		echo "/!\\---------- Please type reboot and reconnect with new IP $new_ip ----------/!\\" >> $LOG
+	else
+		echo "/!\\---------------------- Please type reboot and reconnect ----------------------/!\\"
+		echo "======================================================================================"
+		echo "/!\\---------------------- Please type reboot and reconnect ----------------------/!\\" >> $LOG
+	fi
 fi
+
 ### Final configuration and commit
 ###################################
 

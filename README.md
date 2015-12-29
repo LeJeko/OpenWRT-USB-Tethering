@@ -14,14 +14,14 @@ I've also managed to fit all necessary on a 4MB size firmware with LuCI.
 It is based on the last OpenWRT 15.05 Chaos Calmer and all is pre-configured.
 This firmware doesn't support IPv6 and Wi-Fi.
 
-You can find firmwares for most popular routeur: TL-MR3020 and TL-W703N with the releases
+Firmwares for most popular routeur TL-MR3020 and TL-W703N are provided in the releases
 (aks for any model supported by OpenWRT)
 
 Compile yourself
 -------------
 Rename the chaos_calmer.config file to .config to get the right menuconfig.
 
-v5 2015.12.27 : Jeko
+v5.1 2015.12.29 : Jeko
 ------------------
 Features:
 

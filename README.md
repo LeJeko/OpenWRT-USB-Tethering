@@ -25,10 +25,10 @@ v5.1 2015.12.29 : Auto-installation
 Features:
 
 Check the required packages and installs them if there is enough space available
-Up to 1.6 MB for all packages. A device with 8 MB flash is recommended.
+(Up to 1.6 MB for all packages). A device with 8 MB flash is recommended.
+
 For the common TL-MR3020 and TL-W703N with 4MB flash, a customized firmware
-(without IPv6 and Wi-Fi support)
-is available at https://github.com/LeJeko/OpenWRT-USB-Tethering/releases/tag/v5.1
+(without IPv6 and Wi-Fi support) is available at https://github.com/LeJeko/OpenWRT-USB-Tethering/releases/tag/v5.1
 
 Configure network and firewall via uci commands to ensure compatibility with all devices.
 

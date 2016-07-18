@@ -42,7 +42,7 @@ Benefits:
   even if the screen is locked.
 - Device is charging.
 
-Installation:
+# Installation
 
 **/!\ A valid internet connection via Wi-Fi or WAN Ethernet is required for installing required packages**
 

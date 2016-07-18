@@ -9,8 +9,7 @@ So I've created the script "lockdown.sh" to backup those files each minute and r
 
 Custom firmwares for 4MB flash devices
 ----------------
-Because of space needed for all packages,
-I've also managed to fit all necessary on a 4MB size firmware with LuCI.
+Because of space needed for all packages, I've also managed to fit all necessary on a 4MB size firmware with LuCI.
 It is based on the last OpenWRT 15.05 Chaos Calmer and all is pre-configured.
 This firmware doesn't support IPv6 and Wi-Fi.
 
@@ -21,7 +20,7 @@ Compile yourself
 -------------
 Rename the chaos_calmer.config file to .config to get the right menuconfig.
 
-v5.1 2015.12.29 : Jeko
+v5.1 2015.12.29 : Auto-installation
 ------------------
 Features:
 
@@ -45,13 +44,14 @@ Benefits:
 
 Installation:
 
-* /!\ A valid internet connection via Wi-Fi or WAN Ethernet is required for installing required packages
-* 1. copy the script on the device via scp
-* $ scp lockdown.sh root@192.168.1.1:/tmp/
-* 2. connect to the device and install:
-* $ sh /tmp/lockdown.sh install
-* 3. Restart the device
-* 4. Reconnect with new IP 192.1680.254
+**/!\ A valid internet connection via Wi-Fi or WAN Ethernet is required for installing required packages**
+
+1. copy the script on the device via scp
+  * $ scp lockdown.sh root@192.168.1.1:/tmp/
+2. connect to the device and install:
+  * $ sh /tmp/lockdown.sh install
+3. Restart the device
+4. Reconnect with new IP 192.1680.254
 
 Connect iOS device
 
